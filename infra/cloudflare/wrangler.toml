@@ -1,0 +1,12 @@
+name = "digital-twin-edge"
+main = "src/index.ts"
+compatibility_date = "2026-08-27"
+
+[vars]
+# Set this in the deployment environment; do not commit a real origin URL here.
+API_ORIGIN = "https://replace-with-api-origin.example"
+
+# Add a dedicated private R2 bucket only after explicit approval.
+# [[r2_buckets]]
+# binding = "ARTIFACTS"
+# bucket_name = "digital-twin-artifacts"

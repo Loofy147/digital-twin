@@ -34,3 +34,7 @@ The production deployment must reject development login in non-development envir
 ## Training rollout
 
 The current job handler is a validation stub that demonstrates state transitions and idempotency. The production worker should load only consented observations, create a reproducible dataset manifest, train a bounded Stable-Baselines3 environment, checkpoint to private storage, record metrics, and publish a model version only after evaluation against a holdout set. A failed or low-quality run must not replace the active baseline.
+
+## Cloudflare edge layer
+
+The repository includes a non-deployed Worker package under `infra/cloudflare/`. It is intentionally configured with placeholder origins and no R2 binding. After the API and web origins are known, set the real values through the deployment environment, review the request limits and CORS origin, and deploy a dedicated Worker named `digital-twin-edge`. Use a dedicated private R2 bucket for artifacts and temporary exports; use short-lived signed URLs and lifecycle expiry rather than public object access. Existing account resources such as `omnis-assets` and the existing `omnis-*` Workers must not be modified or reused without explicit ownership confirmation.
