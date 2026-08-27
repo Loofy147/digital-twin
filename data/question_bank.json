@@ -1,0 +1,37 @@
+{
+  "version": "2026-08-27.v1",
+  "dimensions": [
+    {"key":"values","label":"Values","description":"Principles that guide priorities and trade-offs","weight":1.5},
+    {"key":"work_style","label":"Work style","description":"Preferred ways of organizing and executing work","weight":1.3},
+    {"key":"decision_making","label":"Decision making","description":"How choices are evaluated under uncertainty","weight":1.4},
+    {"key":"learning","label":"Learning","description":"How new knowledge and skills are acquired","weight":1.2},
+    {"key":"communication","label":"Communication","description":"Preferred patterns for exchanging information","weight":1.2},
+    {"key":"risk_tolerance","label":"Risk tolerance","description":"Comfort with uncertainty and potential downside","weight":1.3},
+    {"key":"time_management","label":"Time management","description":"Approach to planning, focus, and deadlines","weight":1.1},
+    {"key":"relationships","label":"Relationships","description":"Patterns for trust, boundaries, and collaboration","weight":1.4},
+    {"key":"creativity","label":"Creativity","description":"Tendency to explore, combine, and generate alternatives","weight":1.0},
+    {"key":"environment","label":"Environment","description":"Conditions that support focus and wellbeing","weight":1.0}
+  ],
+  "questions": [
+    {"id":"values-01","dimension":"values","prompt":"When priorities conflict, how strongly do you prefer choosing the option that is most consistent with your principles?","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"values-02","dimension":"values","prompt":"How important is long-term impact compared with immediate convenience?","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"work-01","dimension":"work_style","prompt":"I do my best work when I can protect uninterrupted focus time.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"work-02","dimension":"work_style","prompt":"I prefer a clear plan before starting a complex task.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"decision-01","dimension":"decision_making","prompt":"Before making an important decision, how much evidence do you usually seek?","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"decision-02","dimension":"decision_making","prompt":"When information is incomplete, I am comfortable making a reversible first move.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"learning-01","dimension":"learning","prompt":"I learn best by experimenting and adjusting from feedback.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"learning-02","dimension":"learning","prompt":"I prefer structured explanations before trying something new.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"communication-01","dimension":"communication","prompt":"For important topics, I prefer direct and explicit communication.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"communication-02","dimension":"communication","prompt":"I prefer written context that I can review before responding.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"risk-01","dimension":"risk_tolerance","prompt":"How comfortable are you pursuing an opportunity when the outcome is uncertain?","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"risk-02","dimension":"risk_tolerance","prompt":"I prefer a smaller safe experiment over a large irreversible commitment.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"time-01","dimension":"time_management","prompt":"I reliably break large goals into smaller scheduled actions.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"time-02","dimension":"time_management","prompt":"I can change plans without losing track of the most important outcome.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"relationships-01","dimension":"relationships","prompt":"I make expectations explicit when collaborating with someone.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"relationships-02","dimension":"relationships","prompt":"I need time to build trust before sharing uncertain ideas.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"creativity-01","dimension":"creativity","prompt":"I often generate multiple alternatives before selecting an approach.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"creativity-02","dimension":"creativity","prompt":"Constraints tend to help me find more inventive solutions.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"environment-01","dimension":"environment","prompt":"A predictable environment helps me maintain focus.","response_type":"scale","choices":[1,2,3,4,5]},
+    {"id":"environment-02","dimension":"environment","prompt":"I can do high-quality work despite frequent interruptions.","response_type":"scale","choices":[1,2,3,4,5]}
+  ]
+}

@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DIGITAL_TWIN_DB: /var/lib/digital-twin/digital_twin.sqlite3
+    ports:
+      - "8000:8000"
+    volumes:
+      - twin-data:/var/lib/digital-twin
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /workspace/apps/web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    command: sh -c "corepack enable && pnpm install --no-frozen-lockfile && pnpm dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace
+      - web-node-modules:/workspace/apps/web/node_modules
+    depends_on:
+      - api
+volumes:
+  twin-data:
+  web-node-modules:

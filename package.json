@@ -1,0 +1,10 @@
+{
+  "name": "digital-twin",
+  "private": true,
+  "scripts": {
+    "api": "PYTHONPATH=apps/api uvicorn app.main:app --app-dir apps/api --reload",
+    "api:test": "PYTHONPATH=apps/api pytest -q apps/api/tests",
+    "web:dev": "pnpm --dir apps/web dev",
+    "web:build": "pnpm --dir apps/web build"
+  }
+}
