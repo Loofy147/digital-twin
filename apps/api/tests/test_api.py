@@ -76,3 +76,27 @@ def test_integration_connect_and_revoke():
     providers = client.get("/integrations", headers=auth(token)).json()["providers"]
     assert next(item for item in providers if item["provider"] == "calendar")["status"] == "connected"
     assert client.delete("/integrations/calendar", headers=auth(token)).status_code == 204
+
+
+def test_profile_workflow_insights_activity_and_training_cancel():
+    token, _ = login("workflow@example.com")
+    profile = client.post("/profiles", headers=auth(token), json={"name": "Workflow Twin", "description": "test"}).json()["profile"]
+    profile_id = profile["id"]
+    questions = client.get("/assessment/questions", headers=auth(token)).json()["questions"]
+    answers = [{"question_id": q["id"], "value": 4} for q in questions]
+    assert client.post(f"/profiles/{profile_id}/assessment", headers=auth(token), json={"answers": answers}).status_code == 200
+    insights = client.get(f"/profiles/{profile_id}/insights", headers=auth(token))
+    assert insights.status_code == 200
+    assert insights.json()["dimensions"]
+    scenario = client.post(f"/profiles/{profile_id}/scenarios", headers=auth(token), json={"prompt": "Should I test a new plan?"})
+    assert scenario.status_code == 200
+    activity = client.get(f"/profiles/{profile_id}/activity", headers=auth(token))
+    assert activity.status_code == 200
+    assert any(event["type"] == "scenario" for event in activity.json()["events"])
+    job = client.post(f"/profiles/{profile_id}/training", headers=auth(token), json={"idempotency_key": "cancel-me", "config": {}}).json()["job"]
+    cancelled = client.post(f"/profiles/{profile_id}/training/{job['id']}/cancel", headers=auth(token))
+    assert cancelled.status_code == 200
+    assert cancelled.json()["cancelled"] is False or cancelled.json()["job"]["status"] in {"cancelled", "succeeded"}
+    reset = client.post(f"/profiles/{profile_id}/assessment/reset", headers=auth(token))
+    assert reset.status_code == 200
+    assert client.get(f"/profiles/{profile_id}/insights", headers=auth(token)).json()["dimensions"] == []

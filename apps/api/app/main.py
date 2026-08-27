@@ -210,6 +210,37 @@ def ingest_observation(profile_id: str, provider: str, payload: dict[str, Any], 
     return {"provider": provider, "observation_ids": inserted}
 
 
+@app.post("/profiles/{profile_id}/assessment/reset")
+def reset_assessment(profile_id: str, request: Request, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    require_profile(user, profile_id)
+    DB.execute("delete from assessment_answers where user_id=? and profile_id=?", (user["id"], profile_id))
+    DB.execute("delete from profile_dimensions where profile_id=?", (profile_id,))
+    audit(user["id"], "assessment.reset", "profile", profile_id, request_id=request.headers.get("X-Request-ID"))
+    return {"profile_id": profile_id, "reset": True}
+
+
+@app.get("/profiles/{profile_id}/insights")
+def profile_insights(profile_id: str, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    require_profile(user, profile_id)
+    dimensions = [row_json(r) for r in DB.rows("select d.key,d.label,pd.score,pd.confidence,pd.evidence,pd.updated_at from profile_dimensions pd join dimensions d on d.id=pd.dimension_id where pd.profile_id=? order by pd.updated_at desc", (profile_id,))]
+    activity = [row_json(r) for r in DB.rows("select id,kind,occurred_at,created_at from observations where user_id=? and profile_id=? order by occurred_at desc limit 20", (user["id"], profile_id))]
+    return {"profile_id": profile_id, "dimensions": dimensions, "observation_count": len(activity), "recent_observations": activity}
+
+
+@app.get("/profiles/{profile_id}/activity")
+def profile_activity(profile_id: str, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    require_profile(user, profile_id)
+    events: list[dict[str, Any]] = []
+    for row in DB.rows("select id,created_at,model_version as kind,status,prompt as summary from scenario_runs where user_id=? and profile_id=? order by created_at desc limit 20", (user["id"], profile_id)):
+        events.append({"id": row["id"], "type": "scenario", "status": row["status"], "summary": row["summary"], "created_at": row["created_at"]})
+    for row in DB.rows("select id,created_at,kind as type,occurred_at as summary from observations where user_id=? and profile_id=? order by created_at desc limit 20", (user["id"], profile_id)):
+        events.append({"id": row["id"], "type": row["type"], "status": "stored", "summary": row["summary"], "created_at": row["created_at"]})
+    for row in DB.rows("select id,created_at,status,progress from training_jobs where user_id=? and profile_id=? order by created_at desc limit 20", (user["id"], profile_id)):
+        events.append({"id": row["id"], "type": "training", "status": row["status"], "summary": f"{round(row['progress'] * 100)}% complete", "created_at": row["created_at"]})
+    events.sort(key=lambda item: item["created_at"], reverse=True)
+    return {"events": events[:40]}
+
+
 @app.post("/profiles/{profile_id}/scenarios")
 def simulate(profile_id: str, payload: ScenarioInput, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
     require_profile(user, profile_id)
@@ -241,6 +272,19 @@ def run_training(job_id: str, user_id: str) -> None:
     # Baseline job: validate inputs and publish metadata. Replace with SB3 worker in production.
     DB.execute("update training_jobs set status='succeeded', progress=? where id=? and user_id=?", (1.0,job_id,user_id))
     DB.audit(user_id, "training.succeeded", "training_job", job_id)
+
+
+@app.post("/profiles/{profile_id}/training/{job_id}/cancel")
+def cancel_training(profile_id: str, job_id: str, request: Request, user: dict[str, Any] = Depends(current_user)) -> dict[str, Any]:
+    require_profile(user, profile_id)
+    job = DB.one("select * from training_jobs where id=? and user_id=? and profile_id=?", (job_id, user["id"], profile_id))
+    if not job:
+        raise HTTPException(status_code=404, detail="Training job not found")
+    if job["status"] in {"succeeded", "failed", "cancelled"}:
+        return {"job": row_json(job), "cancelled": False}
+    DB.execute("update training_jobs set status='cancelled', error_message=? where id=? and user_id=?", ("Cancelled by user", job_id, user["id"]))
+    audit(user["id"], "training.cancelled", "training_job", job_id, request_id=request.headers.get("X-Request-ID"))
+    return {"job": row_json(DB.one("select * from training_jobs where id=?", (job_id,))), "cancelled": True}
 
 
 @app.get("/profiles/{profile_id}/training")
